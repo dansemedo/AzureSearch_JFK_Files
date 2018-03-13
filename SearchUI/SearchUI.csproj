@@ -152,6 +152,7 @@
     <Content Include="cia-cryptonyms.json" />
     <None Include="Properties\PublishProfiles\jfkfiles - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\jfkfiles2 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\portaldou - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -184,7 +185,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>2148</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

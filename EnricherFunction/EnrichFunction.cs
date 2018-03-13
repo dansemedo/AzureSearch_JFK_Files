@@ -230,20 +230,7 @@ namespace EnricherFunction
             return Task.FromResult(ciaWords.ToArray());
         }
 
-        private static Task<EntityLink[]> GetLinkedEntitiesAsync(params string[] txts)
-        {
-            var txt = string.Join(Environment.NewLine, txts);
-            if (string.IsNullOrWhiteSpace(txt))
-                return Task.FromResult<EntityLink[]>(null);
-
-            // truncate each page to 10k charactors
-            if (txt.Length > 10000)
-                txt = txt.Substring(0, 10000);
-
-            return linkedEntityClient.LinkAsync(txt);
-        }
-
-        private static async Task<AnnotatedPage> CombineMetadata(OcrResult ocr, OcrResult hw, AnalysisResult vis, EntityLink[] cia, EntityLink[] entities, ImageReference img)
+        private static async Task<AnnotatedPage> CombineMetadata(OcrResult ocr, OcrResult hw, AnalysisResult vis, EntityLink[] cia, ImageReference img)
         {
             // The handwriting result also included OCR text but OCR will produce better results on typed documents
             // so take the result that produces the most text.  Consider combining them by region to take the best of each.
@@ -310,11 +297,6 @@ namespace EnricherFunction
                 imgRef => visionClient.AnalyzeImageAsync(imgRef.Url, new[] { VisualFeature.Tags, VisualFeature.Description }),
                 resizedImage);
 
-            // extract entities linked to wikipedia using the Entity Linking Service
-            var linkedEntities = skillSet.AddSkill("linked-entities",
-                (ocr, hw, vis) => GetLinkedEntitiesAsync(ocr.Text, hw.Text, vis.Description.Captions[0].Text),
-                cogOcr, handwriting, vision);
-
             // combine the data as an annotated document
             var cryptonyms = skillSet.AddSkill("cia-cryptonyms",
                 ocr => DetectCIACryptonyms(ocr.Text),
@@ -323,7 +305,7 @@ namespace EnricherFunction
             // combine the data as an annotated page that can be used by the UI
             var pageContent = skillSet.AddSkill("page-metadata",
                 CombineMetadata,
-                cogOcr, handwriting, vision, cryptonyms, linkedEntities, resizedImage);
+                cogOcr, handwriting, vision, cryptonyms, resizedImage);
 
             return skillSet;
         }
@@ -336,7 +318,7 @@ namespace EnricherFunction
             IEnumerable<Annotation> annotations = await ProcessDocument(blobStream);
 
             // Commit them to Cosmos DB to be used by full corpus skills such as Topics
-            await cosmosDb.SaveAsync(annotations);
+           // await cosmosDb.SaveAsync(annotations);
 
             // Create Search Document and add it to the index
             SearchDocument searchDocument = CreateSearchDocument(name, annotations);
